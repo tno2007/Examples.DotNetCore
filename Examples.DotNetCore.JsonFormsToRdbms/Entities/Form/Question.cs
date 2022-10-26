@@ -5,9 +5,11 @@ namespace Examples.DotNetCore.JsonFormsToRdbms.Entities.Form
     public class Question : BaseEntity
     {
         public int Id { get; set; }
-        public string? Label { get; set; }
         public string? Type { get; set; }
-        public string? HelpText { get; set; }
+        public string? Name { get; set; }
+        public string? Label { get; set; }
+        public string? Validation { get; set; }
+        public string? Help{ get; set; }
         public bool Required { get; set; }
         public virtual Questionnaire? Questionnaire { get; set; }
     }
