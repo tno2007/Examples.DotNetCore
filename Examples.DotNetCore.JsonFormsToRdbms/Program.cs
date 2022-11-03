@@ -2,15 +2,223 @@
 
 using Examples.DotNetCore.JsonFormsToRdbms.Contexts;
 using Examples.DotNetCore.JsonFormsToRdbms.Entities.Form;
-using Examples.EfCore.Entities.Library;
-using System.Text;
 
-Seed();
-//InsertData();
-//PrintData();
+SeedAsync();
+
+static void SeedQuestionnaire(FormContext context)
+{
+    var questionnaires = new List<Questionnaire>()
+    {
+        new Questionnaire
+        {
+            Name = "Client Questionnaire"
+        },
+        new Questionnaire 
+        {
+            Name = "Address Capture"
+        }
+    };
+
+    if (context.Questionnaire == null) return ;
+
+    context.Questionnaire.AddRange(questionnaires);
+    
+    context.SaveChanges();
+}
+
+static void SeedQuestions(FormContext context)
+{
+    var questionnaires = context.Questionnaire;
+
+    var clientQuestionnaire = questionnaires.First(x => x.Name.Equals("Client Questionnaire"));
+
+    var clientQuestions = new List<Question>() {
+            new Question {
+                Questionnaire = clientQuestionnaire,
+                Label = "First name",
+                FieldType = "text",
+                MappedEntity = "contact",
+                MappedAttribute = "firstname",
+                Answer = "Joe"
+            },
+            new Question {
+                Questionnaire = clientQuestionnaire,
+                Label = "Last name",
+                FieldType = "text",
+                MappedEntity = "contact",
+                MappedAttribute = "lastname",
+                Answer = "Bloggs"
+            },
+            new Question {
+                Questionnaire = clientQuestionnaire,
+                Label = "Date of birth",
+                FieldType = "date",
+                MappedEntity = "contact",
+                MappedAttribute = "dateofbirth",
+                Answer = "1978-12-31T22:00:00.000Z"
+            },
+            new Question {
+                Questionnaire = clientQuestionnaire,
+                Label = "Sex",
+                FieldType = "radio",
+                MappedEntity = "contact",
+                IsOptionSet = true,
+                MappedAttribute = "new_gender",
+                Answer = "1"
+            },
+            new Question {
+                Questionnaire = clientQuestionnaire,
+                Label = "Country",
+                FieldType = "select",
+                IsOptionSet = true,
+                MappedEntity = "contact",
+                MappedAttribute = "new_country",
+                Answer = "5578"
+            },
+            new Question {
+                Questionnaire = clientQuestionnaire,
+                Label = "Address line 1",
+                FieldType = "string",
+                MappedEntity = "contact",
+                MappedAttribute = "address1_line1",
+                Answer = "224B Clarence street"
+            },
+            new Question {
+                Questionnaire = clientQuestionnaire,
+                Label = "Address line 2",
+                FieldType = "string",
+                MappedEntity = "contact",
+                MappedAttribute = "address1_line2",
+                Answer = ""
+            },
+            new Question {
+                Questionnaire = clientQuestionnaire,
+                Label = "Post Town/City",
+                FieldType = "string",
+                MappedEntity = "contact",
+                MappedAttribute = "address1_city",
+                Answer = "Vogeltown"
+            },
+            new Question {
+                Questionnaire = clientQuestionnaire,
+                Label = "State/Province",
+                FieldType = "string",
+                MappedEntity = "contact",
+                MappedAttribute = "address1_stateorprovince",
+                Answer = "Wellington"
+            },
+            new Question {
+                Questionnaire = clientQuestionnaire,
+                Label = "Postal code",
+                FieldType = "string",
+                MappedEntity = "contact",
+                MappedAttribute = "address1_postalcode",
+                Answer = "6023"
+            }
+        };
+
+    context.Question.AddRange(clientQuestions);
+
+    var addressCapture = questionnaires.First(x => x.Name.Equals("Address Capture"));
+
+    var dependentsMainQuestion = new Question
+    {
+        Questionnaire = addressCapture,
+        Label = "Please provide all your addresses for the past 5 years",
+        FieldType = "repatable",
+        MappedEntity = "address", // the entity where we will save the listing/rows
+        Answer = "" // wont have an answer, since its jsut a group
+    };
+
+    context.Question.Add(dependentsMainQuestion);
+
+    var dependentsMainChildQuestions = new List<Question>()
+    {
+            new Question {
+                Questionnaire = addressCapture,
+                Label = "Country",
+                FieldType = "select",
+                IsOptionSet = true,
+                MappedEntity = "",
+                MappedAttribute = "country",
+                Answer = "5578",
+                Parent = dependentsMainQuestion
+            },
+            new Question {
+                Questionnaire = addressCapture,
+                Label = "Address line 1",
+                FieldType = "string",
+                MappedEntity = "",
+                MappedAttribute = "addressline1",
+                Answer = "",
+                Parent = dependentsMainQuestion
+            },
+            new Question {
+                Questionnaire = addressCapture,
+                Label = "Address line 2",
+                FieldType = "string",
+                MappedEntity = "",
+                MappedAttribute = "addressline2",
+                Answer = "",
+                Parent = dependentsMainQuestion
+            },
+            new Question {
+                Questionnaire = addressCapture,
+                Label = "Post Town/City",
+                FieldType = "string",
+                MappedEntity = "",
+                MappedAttribute = "city",
+                Answer = "",
+                Parent = dependentsMainQuestion
+            },
+            new Question {
+                Questionnaire = addressCapture,
+                Label = "State/Province",
+                FieldType = "string",
+                MappedEntity = "",
+                MappedAttribute = "stateorprovince",
+                Answer = "",
+                Parent = dependentsMainQuestion
+            },
+            new Question {
+                Questionnaire = addressCapture,
+                Label = "Postal code",
+                FieldType = "string",
+                MappedEntity = "",
+                MappedAttribute = "postalcode",
+                Answer = "",
+                Parent = dependentsMainQuestion
+            }
+    };
+
+    context.Question.AddRange(dependentsMainChildQuestions);
+
+    context.SaveChanges();
+}
+
+static void SeedContact(FormContext context)
+{
+    var contact = new Contact()
+    {
+        firstname = "Joe",
+        lastname = "Bloggs",
+        dateofbirth = "1978-12-31T22:00:00.000Z",
+        country = "5578",
+        address1_line1 = "224B Clarence street",
+        address1_line2 = "",
+        address1_city = "Vogeltown",
+        address1_stateorprovince = "Wellington",
+        address1_postalcode = "6023",
+        new_gender = "1"
+    };
+
+    context.Contact.Add(contact);
+
+    context.SaveChanges();
+}
 
 
-static void Seed()
+static async Task SeedAsync()
 {
     using (var context = new FormContext())
     {
@@ -18,105 +226,50 @@ static void Seed()
         context.Database.EnsureDeleted();
         context.Database.EnsureCreated();
 
-        // add publisher
-        var questionnaire = new Questionnaire
-        {
-            Name = "Client Questionnaire"
-        };
+        SeedQuestionnaire(context);
+
+        //if (questionnaire == null) return;
+
+        SeedQuestions(context);
 
         if (context.Questionnaire == null) return;
 
-        context.Questionnaire.Add(questionnaire);
+        // get client questionnaire
+        var questionare = context.Questionnaire.FirstOrDefault(x => x.Name.Equals("Client Questionnaire"));
 
-        // add some books
-        var questions = new List<Question>() {
-            new Question {
-                Questionnaire = questionnaire,
-                Label = "First name",
-                Type = "string"
-            },
-            new Question {
-                Questionnaire = questionnaire,
-                Label = "Last name",
-                Type = "string"
-            }
-        };
-
+        
         if (context.Question == null) return;
 
-        context.Question.AddRange(questions);
+        // get questions of this questionnaire
+        var questions = context.Question.Where(x => x.Questionnaire.Equals(questionare));        
+        
+        // null check
+        if (questions == null) return;
 
-        // saves changes
-        context.SaveChanges();
+        SeedContact(context);
+
+
+
     }
 }
 
 
-static void InsertData()
+
+/*
+static void PopulateFieldsTypes(string[] args)
 {
-    using (var context = new LibraryContext())
+    // fill types
+    var fieldTypes = new List<FieldType>();
+
+    fieldTypes.Add(new FieldType
     {
-        // create db if not exists
-        context.Database.EnsureDeleted();
-        context.Database.EnsureCreated();
-
-        // add publisher
-        var publisher = new Publisher
-        {
-            Name = "Mariner Books"
-        };
-
-        context.Publisher.Add(publisher);
-
-        // add some books
-        var books = new List<Book>();
-
-        books.Add(new Book
-        {
-            Isbn = "978-0544003415",
-            Title = "The Lord of the Rings",
-            Author = "J.R.R. Tolkien",
-            Language = "English",
-            Pages = 1216,
-            Publisher = publisher
-        });
-
-        books.Add(new Book
-        {
-            Isbn = "978-0547247762",
-            Title = "The Sealed Letter",
-            Author = "Emma Donoghue",
-            Language = "English",
-            Pages = 416,
-            Publisher = publisher
-        });
-
-        context.Book.AddRange(books);
-
-        // saves changes
-        context.SaveChanges();
-    }
-}
-
-static void PrintData()
-{
-    // Gets and prints all books in database
-    using (var context = new LibraryContext())
+        Name = "string"
+    });
+    fieldTypes.Add(new FieldType
     {
-        //var books = context.Book.
-        //.Include(p => p.Publisher);
-
-        var books = context.Book;
-
-        if (books == null) return;
-
-        foreach (var book in books)
-        {
-            var data = new StringBuilder();
-            data.AppendLine($"ISBN: {book.Isbn}");
-            data.AppendLine($"Title: {book.Title}");
-            data.AppendLine($"Publisher: {book.Publisher.Name}");
-            Console.WriteLine(data.ToString());
-        }
-    }
+        Name = "number"
+    });
+    if (context.FieldType == null) return;
+    context.FieldType.AddRange(fieldTypes);
 }
+*/

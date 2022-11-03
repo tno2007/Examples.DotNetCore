@@ -6,9 +6,10 @@ namespace Examples.DotNetCore.JsonFormsToRdbms.Contexts
 {
     public class FormContext : DbContext
     {
-        public DbSet<Question>? Question { get; set; }
-
+        public DbSet<FieldType>? FieldType { get; set; }
         public DbSet<Questionnaire>? Questionnaire { get; set; }
+        public DbSet<Question>? Question { get; set; }
+        public DbSet<Contact>? Contact { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -30,6 +31,11 @@ namespace Examples.DotNetCore.JsonFormsToRdbms.Contexts
             {
                 entity.HasKey(q => q.Id);
                 entity.HasOne(q => q.Questionnaire).WithMany(q => q.Questions);
+            });
+
+            modelBuilder.Entity<Contact>(entity =>
+            {
+                entity.HasKey(q => q.Id);                
             });
         }
 
